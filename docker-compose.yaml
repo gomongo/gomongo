@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  mongo_1:
+    image: mongo:4.2.8
+    command: --replSet replset1
+    container_name: mongo_1
+    networks:
+      - mongo
+    ports:
+      - "27017:27017"
+  mongo_2:
+    image: mongo:4.2.8
+    command: --replSet replset1
+    container_name: mongo_2
+    networks:
+      - mongo
+    ports: 
+      - "27018:27017"
+  mongo_3:
+    image: mongo:4.2.8
+    command: --replSet replset1
+    container_name: mongo_3
+    networks:
+      - mongo
+    ports: 
+      - "27019:27017"
+
+networks:
+  mongo:
+    
