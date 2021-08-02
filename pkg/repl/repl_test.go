@@ -50,3 +50,37 @@ func TestInitiateReplicaSet(t *testing.T) {
 	assert.EqualValues(t, expectedCommand, mockClient.RunCommandArg)
 
 }
+
+func TestConfigureReplicaSet(t *testing.T) {
+	mockClient := MockClient{}
+	
+	replicaSetConfig := ReplSetConfig{
+		ID: "myReplicaSet",
+		Members: []ReplSetMember{
+			{
+				ID: 0,
+				Host: "myHost",
+			},
+			{
+				ID: 1,
+				Host: "myHost2",
+			},
+			{
+				ID: 2,
+				Host: "myHost3",
+			},
+		},
+	}
+	force := false
+	maxTimeMS := 5000
+	expectedCommand := bson.M{
+		"replSetReconfig": replicaSetConfig,
+		"force": force,
+		"maxTimeMS": maxTimeMS,
+	}
+
+	_ = ConfigureReplicaSet(context.TODO(), &mockClient, replicaSetConfig, force, maxTimeMS)
+
+	assert.EqualValues(t, expectedCommand, mockClient.RunCommandArg)
+
+}

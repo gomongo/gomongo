@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"golang.org/x/text/number"
 )
 
 // ReplClient is an abstraction of the MongoDB Golang driver's [Database](https://pkg.go.dev/go.mongodb.org/mongo-driver/mongo?utm_source=godoc#Database) type.
@@ -28,7 +27,8 @@ type ReplSetInitiateConfig struct{
 
 // ReplSetMember represents a single member of a replica set.
 type ReplSetMember struct {
-	ReplSetInitiateMember
+	ID int `bson:"_id"`
+	Host string `bson:"host"`
 	ArbiterOnly bool `bson:"arbiterOnly"`
 	BuildIndexes bool `bson:"buildIndexes"`
 	Hidden bool `bson:"hidden"`
@@ -42,16 +42,30 @@ type ReplSetMember struct {
 // mirroring the document structure returned by the [`replSetGetConfig`](https://docs.mongodb.com/v4.2/reference/command/replSetGetConfig/) command.
 type ReplSetConfig struct {
 	ID string `bson:"_id"`
+	Members []ReplSetMember `bson:"members"`
 	Version int `bson:"version"`
 	ProtocolVersion float32 `bson:"protocolVersion"`
 	WriteConcernMajorityJournalDefault bool `bson:"writeConcernMajorityJournalDefault"`
-
 }
 
+// InitiateReplicaSet will initialize a new replica set on a set of MongoDB instances.
 func InitiateReplicaSet(ctx context.Context, client ReplClient, config ReplSetInitiateConfig) error {
 	
 	cmd := bson.M{
 		"replSetInitiate": config,
+	}
+	result := client.RunCommand(ctx,cmd)
+	err := result.Err()
+	
+	return err
+}
+
+// ConfigureReplicaSet will configure an existing replica set within a set of MongoDB instances.
+func ConfigureReplicaSet(ctx context.Context, client ReplClient, config ReplSetConfig, force bool, maxTimeMS int) error {
+	cmd := bson.M{
+		"replSetReconfig": config,
+		"force": force,
+		"maxTimeMS": maxTimeMS,
 	}
 	result := client.RunCommand(ctx,cmd)
 	err := result.Err()
