@@ -72,3 +72,25 @@ func ConfigureReplicaSet(ctx context.Context, client ReplClient, config ReplSetC
 	
 	return err
 }
+
+// convertConfigureToInitializeReplicaSet is an internal function used to translate a provided ReplSetConfigure object to an equivalent initiate
+// object. It's intent is to be used when we first need to initialize a replica set before doing more configuration.
+func convertConfigureToInitializeReplicaSet(config ReplSetConfig) ReplSetInitiateConfig {
+	replSetInitiateConfig := ReplSetInitiateConfig{
+		ID: config.ID,
+		Members: nil,
+	}
+	
+	replSetInitateMembers := []ReplSetInitiateMember{}
+	for _, v := range(config.Members) {
+		replSetInitateMembers = append(replSetInitateMembers, ReplSetInitiateMember{
+				ID: v.ID,
+				Host: v.Host,
+			},
+		)
+	}
+
+	replSetInitiateConfig.Members = replSetInitateMembers
+
+	return replSetInitiateConfig
+}

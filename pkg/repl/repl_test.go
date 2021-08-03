@@ -84,3 +84,51 @@ func TestConfigureReplicaSet(t *testing.T) {
 	assert.EqualValues(t, expectedCommand, mockClient.RunCommandArg)
 
 }
+
+func TestConvertConfigureToInitializeReplicaSet(t *testing.T) {
+	replSetID := "myreplset"
+	replSetMemberHost1 := "host1"
+	replSetMemberHost2 := "host2"
+	replSetMemberHost3 := "host3"
+	replSetConfig := ReplSetConfig {
+		ID: replSetID,
+		Members: []ReplSetMember{
+			{
+				ID: 0,
+				Host: replSetMemberHost1,
+				Priority: 1,
+			},
+			{
+				ID: 1,
+				Host: replSetMemberHost2,
+				Priority: 1,
+			},
+			{
+				ID: 2,
+				Host: replSetMemberHost3,
+				Priority: 2,
+			},
+		},
+	}
+	expectedReplSetInitiateConfig := ReplSetInitiateConfig{
+		ID: replSetID,
+		Members: []ReplSetInitiateMember{
+			{
+				ID: 0,
+				Host: replSetMemberHost1,
+			},
+			{
+				ID: 1,
+				Host: replSetMemberHost2,
+			},
+			{
+				ID: 2,
+				Host: replSetMemberHost3,
+			},
+		},
+	}
+
+	actualReplSetInitiateConfig := convertConfigureToInitializeReplicaSet(replSetConfig)
+
+	assert.Equal(t, expectedReplSetInitiateConfig, actualReplSetInitiateConfig)
+}
